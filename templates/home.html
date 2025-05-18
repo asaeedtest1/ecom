@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Home - MyShop{% endblock %}
+{% block content %}
+<!-- Banner Section -->
+<div class="container-fluid p-0 mb-5">
+  {% if banner and banner.image %}
+    <div class="bg-dark text-white text-center py-5" style="background: url('{{ banner.image.url }}') center/cover no-repeat; min-height: 300px;">
+      {% if banner.title %}
+        <h1 class="display-3 fw-bold mb-3" style="{% if banner.title_color %}color: {{ banner.title_color }};{% endif %}{% if banner.title_font %} font-family: {{ banner.title_font }};{% endif %}">{{ banner.title }}</h1>
+      {% else %}
+        <h1 class="display-3 fw-bold mb-3">Welcome to MyShop</h1>
+      {% endif %}
+      {% if banner.subtitle %}
+        <p class="lead mb-4" style="{% if banner.subtitle_color %}color: {{ banner.subtitle_color }};{% endif %}{% if banner.subtitle_font %} font-family: {{ banner.subtitle_font }};{% endif %}">{{ banner.subtitle }}</p>
+      {% else %}
+        <p class="lead mb-4">Your one-stop shop for all your needs. Discover the latest products and deals!</p>
+      {% endif %}
+      <a href="/shop/" class="btn btn-primary btn-lg">Shop Now <i class="bi bi-arrow-right-circle"></i></a>
+    </div>
+  {% else %}
+    <div class="bg-dark text-white text-center py-5" style="background: url('/static/banner.jpg') center/cover no-repeat; min-height: 300px;">
+      <h1 class="display-3 fw-bold mb-3">Welcome to MyShop</h1>
+      <p class="lead mb-4">Your one-stop shop for all your needs. Discover the latest products and deals!</p>
+      <a href="/shop/" class="btn btn-primary btn-lg">Shop Now <i class="bi bi-arrow-right-circle"></i></a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+  <div class="row text-center">
+    <div class="col-md-4 mb-4">
+      <i class="bi bi-truck display-4 text-primary mb-3"></i>
+      <h5>Fast Delivery</h5>
+      <p>Get your orders delivered quickly and safely to your doorstep.</p>
+    </div>
+    <div class="col-md-4 mb-4">
+      <i class="bi bi-shield-check display-4 text-success mb-3"></i>
+      <h5>Secure Shopping</h5>
+      <p>Shop with confidence with our secure checkout and payment process.</p>
+    </div>
+    <div class="col-md-4 mb-4">
+      <i class="bi bi-star display-4 text-warning mb-3"></i>
+      <h5>Top Rated Products</h5>
+      <p>Browse our bestsellers and customer favorites, handpicked for you.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Call to Action Banner -->
+<div class="container-fluid bg-primary text-white text-center py-4 mb-5">
+  <h2 class="mb-2">Sign up for exclusive offers!</h2>
+  <a href="/accounts/register/" class="btn btn-light btn-lg">Create Account</a>
+</div>
+
+<!-- Featured Products & Blog Section -->
+<div class="container mb-5">
+  <div class="row">
+    <div class="col-md-8 mb-4">
+      <h3 class="mb-3">Featured Products</h3>
+      {% if featured_products %}
+        <div class="row g-3">
+          {% for product in featured_products %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              {% if product.get_image %}
+              <img src="{{ product.get_image }}" class="card-img-top p-2 rounded-4" alt="{{ product.name }}" style="object-fit:cover; height:180px;">
+              {% endif %}
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-1"><a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">{{ product.name }}</a></h5>
+                <p class="card-text small text-muted mb-2">{{ product.description|truncatewords:15 }}</p>
+                <span class="badge bg-success fs-6">${{ product.price }}</span>
+                <a href="{% url 'product_detail' product.slug %}" class="btn btn-primary btn-sm mt-2">View</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info">No featured products set for homepage.</div>
+      {% endif %}
+    </div>
+    <div class="col-md-4 mb-4">
+      <h3 class="mb-3">Latest Blog</h3>
+      {% if featured_blogs %}
+        <div class="list-group">
+          {% for blog in featured_blogs %}
+          <a href="{% url 'blog_detail' blog.slug %}" class="list-group-item list-group-item-action">
+            <div class="d-flex align-items-center">
+              {% if blog.get_image %}
+              <img src="{{ blog.get_image }}" alt="{{ blog.title }}" class="rounded me-3" style="width:60px; height:60px; object-fit:cover;">
+              {% endif %}
+              <div>
+                <h6 class="mb-1">{{ blog.title }}</h6>
+                <small class="text-muted">{{ blog.created_at|date:"M d, Y" }}</small>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info">No featured blog posts set for homepage.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

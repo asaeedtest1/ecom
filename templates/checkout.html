@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - MyShop{% endblock %}
+{% block content %}
+<main id="main-content" tabindex="-1">
+  <h1 class="mb-4">Checkout</h1>
+  {% if success %}
+    <div class="alert alert-success" role="alert">Thank you! Your order has been placed.</div>
+    <a href="/shop/" class="btn btn-primary" aria-label="Continue shopping">Continue Shopping <i class="bi bi-shop" aria-hidden="true"></i></a>
+  {% else %}
+    {% if errors %}
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <form method="post" aria-label="Checkout form">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="delivery_address" class="form-label">Delivery Address</label>
+        <textarea class="form-control" id="delivery_address" name="delivery_address" rows="2" required>{{ request.POST.delivery_address }}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="contact_email" class="form-label">Contact Email</label>
+        <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ request.POST.contact_email|default:request.user.email }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="contact_phone" class="form-label">Contact Phone</label>
+        <input type="text" class="form-control" id="contact_phone" name="contact_phone" value="{{ request.POST.contact_phone }}" required>
+      </div>
+      <div class="table-responsive mb-3">
+        <table class="table table-striped table-hover align-middle" aria-label="Order summary">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart_items %}
+            <tr>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.subtotal }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="fw-bold fs-5">Total: ${{ total }}</p>
+      <button type="submit" class="btn btn-success btn-lg" aria-label="Place order">Place Order <i class="bi bi-credit-card" aria-hidden="true"></i></button>
+    </form>
+  {% endif %}
+
+  {% if mock_payment %}
+    <div class="alert alert-info mt-4" role="alert">This is a mock payment step. Click below to confirm your payment.</div>
+    <form method="post" aria-label="Mock payment confirmation">
+      {% csrf_token %}
+      <input type="hidden" name="confirm_payment" value="1">
+      <button type="submit" class="btn btn-success btn-lg" aria-label="Confirm payment">Confirm Payment <i class="bi bi-check-circle" aria-hidden="true"></i></button>
+    </form>
+  {% endif %}
+</main>
+{% endblock %}

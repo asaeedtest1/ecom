@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} - Blog - MyShop{% endblock %}
+{% block content %}
+<article>
+    <h1>{{ post.title }}</h1>
+    {% if post.image %}
+    <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="{{ post.title }}">
+    {% endif %}
+    <div>{{ post.content|linebreaks }}</div>
+    <p class="text-muted mt-3">Published on {{ post.created_at|date:"F j, Y" }}</p>
+</article>
+{% endblock %}

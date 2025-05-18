@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Login - MyShop{% endblock %}
+{% block content %}
+<main id="main-content" tabindex="-1">
+  <h1 class="mb-4">Login</h1>
+  <form method="post" class="needs-validation" novalidate aria-label="Login form">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg" aria-label="Login">Login <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i></button>
+  </form>
+  {% if form.errors %}
+    <div class="alert alert-danger mt-3" role="alert">Invalid username or password.</div>
+  {% endif %}
+</main>
+{% endblock %}

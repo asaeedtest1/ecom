@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - MyShop{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <h1 class="mb-4">Admin Dashboard</h1>
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card text-bg-primary h-100">
+        <div class="card-body">
+          <h5 class="card-title">Total Users</h5>
+          <p class="display-6 fw-bold">{{ total_users }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-bg-success h-100">
+        <div class="card-body">
+          <h5 class="card-title">Total Orders</h5>
+          <p class="display-6 fw-bold">{{ total_orders }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-bg-warning h-100">
+        <div class="card-body">
+          <h5 class="card-title">Total Sales</h5>
+          <p class="display-6 fw-bold">${{ total_sales|floatformat:2 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-bg-info h-100">
+        <div class="card-body">
+          <h5 class="card-title">Products</h5>
+          <p class="display-6 fw-bold">{{ total_products }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card text-bg-danger h-100">
+        <div class="card-body">
+          <h5 class="card-title">Wishlists</h5>
+          <p class="display-6 fw-bold">{{ total_wishlist }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-bg-secondary h-100">
+        <div class="card-body">
+          <h5 class="card-title">Blog Posts</h5>
+          <p class="display-6 fw-bold">{{ total_blog_posts }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Top Products</h5>
+          <ul class="list-group">
+            {% for product in top_products %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ product.name }}
+              <span class="badge bg-primary rounded-pill">{{ product.total_sold|default:0 }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item">No data</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Recent Orders</h5>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Total Items</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td>{{ order.id }}</td>
+              <td>{{ order.user.username }}</td>
+              <td>{{ order.status }}</td>
+              <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{{ order.items.count }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No recent orders.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-3">
+      <a href="/admin/shop/product/" class="btn btn-outline-primary w-100 mb-2"><i class="bi bi-box-seam me-1"></i> Manage Products</a>
+      <a href="/admin/shop/category/" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-tags me-1"></i> Manage Categories</a>
+    </div>
+    <div class="col-md-3">
+      <a href="/admin/shop/order/" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-bag-check me-1"></i> Manage Orders</a>
+      <a href="/admin/shop/orderitem/" class="btn btn-outline-info w-100 mb-2"><i class="bi bi-list-check me-1"></i> Manage Order Items</a>
+    </div>
+    <div class="col-md-3">
+      <a href="/admin/auth/user/" class="btn btn-outline-dark w-100 mb-2"><i class="bi bi-people me-1"></i> Manage Users</a>
+      <a href="/admin/accounts/profile/" class="btn btn-outline-warning w-100 mb-2"><i class="bi bi-person-lines-fill me-1"></i> Manage Profiles</a>
+    </div>
+    <div class="col-md-3">
+      <a href="/admin/blog/blogpost/" class="btn btn-outline-danger w-100 mb-2"><i class="bi bi-journal-text me-1"></i> Manage Blog Posts</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Cart - MyShop{% endblock %}
+{% block content %}
+<main id="main-content" tabindex="-1">
+  <h1 class="mb-4">Your Cart</h1>
+  {% if cart_items %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle" aria-label="Shopping cart table">
+      <thead class="table-dark">
+        <tr>
+          <th scope="col">Product</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Subtotal</th>
+          <th scope="col" aria-label="Remove"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+        <tr>
+          <td>{{ item.product.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>${{ item.subtotal }}</td>
+          <td>
+            <form action="{% url 'cart_remove' item.product.id %}" method="post" aria-label="Remove from cart">
+              {% csrf_token %}
+              <button class="btn btn-danger btn-sm" aria-label="Remove {{ item.product.name }} from cart">
+                <i class="bi bi-trash" aria-hidden="true"></i> <span class="visually-hidden">Remove</span>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="fw-bold fs-5">Total: ${{ total }}</p>
+  <a href="{% url 'checkout' %}" class="btn btn-success btn-lg" aria-label="Proceed to checkout">Proceed to Checkout <i class="bi bi-arrow-right-circle" aria-hidden="true"></i></a>
+  {% else %}
+  <div class="alert alert-info" role="alert">Your cart is empty.</div>
+  {% endif %}
+</main>
+{% endblock %}

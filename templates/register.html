@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Register - MyShop{% endblock %}
+{% block content %}
+<main id="main-content" tabindex="-1">
+  <h1 class="mb-4">Register</h1>
+  <form method="post" class="needs-validation" novalidate aria-label="Registration form">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-success btn-lg" aria-label="Register">Register <i class="bi bi-person-plus" aria-hidden="true"></i></button>
+  </form>
+</main>
+{% endblock %}

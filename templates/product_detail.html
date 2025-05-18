@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - MyShop{% endblock %}
+{% block content %}
+<div class="row mt-4">
+  <div class="col-md-6">
+    <img id="main-product-image" src="{{ product.get_image }}" class="img-fluid rounded-4 shadow mb-3" alt="{{ product.name }}">
+    <div class="mb-3">
+      <img src="{{ product.get_image }}" alt="{{ product.name }}" class="img-thumbnail me-2 mb-2 product-thumb" style="max-width:120px; max-height:120px; cursor:pointer;">
+      {% if product.images.all %}
+        {% for img in product.images.all %}
+          <img src="{{ img.get_image }}" alt="{{ img.alt_text|default:product.name }}" class="img-thumbnail me-2 mb-2 product-thumb" style="max-width:120px; max-height:120px; cursor:pointer;">
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <h1 class="fw-bold mb-2">{{ product.name }}</h1>
+    <div class="mb-2">
+      <span class="badge bg-primary filter-badge" data-filter-type="category" data-filter-value="{{ product.category.slug }}" role="button" tabindex="0">Category: {{ product.category.name }}</span>
+      {% if product.size %}
+        <span class="badge bg-secondary ms-1 filter-badge" data-filter-type="size" data-filter-value="{{ product.size }}" role="button" tabindex="0">Size: {{ product.size }}</span>
+        <span id="size-variations" class="ms-2"></span>
+      {% endif %}
+      {% if product.color %}
+        <span class="badge bg-warning text-dark ms-1 filter-badge" data-filter-type="color" data-filter-value="{{ product.color }}" role="button" tabindex="0">Color: {{ product.color }}</span>
+        <span id="color-variations" class="ms-2"></span>
+      {% endif %}
+    </div>
+    <p class="text-muted mb-3" id="product-description">{{ product.description }}</p>
+    {% if product.long_description %}
+    <div class="mb-4">
+      <h5 class="fw-semibold">Product Details</h5>
+      <div class="text-body">{{ product.long_description|linebreaks }}</div>
+    </div>
+    {% endif %}
+    <h3 class="fw-bold text-success mb-3" id="product-price">{{ currency_symbol }}{{ product.price }}</h3>
+    <form action="{% url 'cart_add' product.id %}" method="post" class="d-flex align-items-center gap-2 mb-3" id="cart-form">
+      {% csrf_token %}
+      <input type="number" name="quantity" value="1" min="1" class="form-control form-control-sm w-25" style="min-width:60px;">
+      <button type="submit" class="btn btn-primary btn-lg flex-fill"><i class="bi bi-cart-plus"></i> Add to Cart</button>
+    </form>
+    <form action="{% url 'wishlist_add' product.id %}" method="post" id="wishlist-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger btn-lg w-100"><i class="bi bi-heart"></i> Add to Wishlist</button>
+    </form>
+  </div>
+</div>
+<div class="mb-4">
+  <h5 class="fw-semibold">Customer Reviews & Feedback</h5>
+  {% if product.reviews.all %}
+    {% for review in product.reviews.all %}
+      <div class="border rounded-3 p-2 mb-2">
+        <div class="fw-bold">
+          {{ review.user.username }}
+          <span class="text-warning">
+            {% for i in "12345" %}
+              {% if forloop.counter <= review.rating %}&#9733;{% else %}&#9734;{% endif %}
+            {% endfor %}
+          </span>
+        </div>
+        <div class="small text-muted">{{ review.created_at|date:"M d, Y H:i" }}</div>
+        <div>{{ review.comment }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-muted">No reviews yet. Be the first to review this product!</div>
+  {% endif %}
+  {% if user.is_authenticated %}
+  <form method="post" action="" class="mt-3" id="review-form">
+    {% csrf_token %}
+    <div class="mb-2">
+      <label for="id_rating" class="form-label">Your Rating:</label>
+      <select name="rating" id="id_rating" class="form-select w-auto d-inline-block">
+        {% for i in "12345" %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="mb-2">
+      <label for="id_comment" class="form-label">Your Review:</label>
+      <textarea name="comment" id="id_comment" class="form-control" rows="2" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+  </form>
+  {% else %}
+  <div class="text-muted">Please <a href="/accounts/login/">login</a> to leave a review.</div>
+  {% endif %}
+</div>
+<div class="mb-4">
+  <h5 class="fw-semibold">Suggested Products</h5>
+  <div class="row row-cols-2 row-cols-md-4 g-3">
+    {% for suggestion in suggested_products %}
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm product-suggestion-card">
+        <div class="ratio ratio-1x1 bg-light rounded-top overflow-hidden">
+          <img src="{{ suggestion.get_image }}" class="card-img-top suggestion-img" alt="{{ suggestion.name }}" style="object-fit:cover; width:100%; height:100%;">
+        </div>
+        <div class="card-body p-2 d-flex flex-column">
+          <div class="fw-semibold small text-truncate mb-1" title="{{ suggestion.name }}">{{ suggestion.name }}</div>
+          <div class="card-text text-muted small mb-2">{{ suggestion.description|truncatewords:10 }}</div>
+          <div class="d-flex align-items-center mt-auto gap-2">
+            <span class="badge bg-success fs-6">{{ currency_symbol }}{{ suggestion.price }}</span>
+            <a href="/shop/{{ suggestion.slug }}/" class="btn btn-primary btn-sm ms-auto">View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function renderVariationList(type, variations, currentValue, variationObjects) {
+  let html = '';
+  if (variations.length > 1) {
+    html = '<span class="badge bg-light text-dark">Other ' + type + 's:</span> ';
+    html += variations.map(v => {
+      // Find the variation object for this value
+      const obj = variationObjects.find(o => o[type] === v);
+      if (obj && obj.slug) {
+        return `<a href="/shop/${obj.slug}/" class="badge bg-light text-dark border border-secondary variation-badge" data-value="${v}" role="button" tabindex="0">${v}${v === currentValue ? ' (current)' : ''}</a>`;
+      } else {
+        return `<span class="badge bg-light text-dark border border-secondary variation-badge disabled" data-value="${v}">${v}</span>`;
+      }
+    }).join(' ');
+  }
+  return html;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  function updateProduct(data) {
+    if (!data.success) return alert(data.error || 'No product found.');
+    const p = data.product;
+    document.querySelector('h1.fw-bold').textContent = p.name;
+    document.getElementById('product-description').textContent = p.description;
+    document.getElementById('product-price').textContent = p.currency_symbol + p.price;
+    if (p.image_url) {
+      document.querySelector('.img-fluid').src = p.image_url;
+      document.querySelector('.img-fluid').alt = p.name;
+    }
+    // Update badges
+    document.querySelector('.filter-badge[data-filter-type="category"]').textContent = 'Category: ' + p.category;
+    document.querySelector('.filter-badge[data-filter-type="category"]').setAttribute('data-filter-value', p.category_slug);
+    if (p.size) {
+      let sizeBadge = document.querySelector('.filter-badge[data-filter-type="size"]');
+      if (sizeBadge) {
+        sizeBadge.textContent = 'Size: ' + p.size;
+        sizeBadge.setAttribute('data-filter-value', p.size);
+        sizeBadge.style.display = '';
+      }
+    } else {
+      let sizeBadge = document.querySelector('.filter-badge[data-filter-type="size"]');
+      if (sizeBadge) sizeBadge.style.display = 'none';
+    }
+    if (p.color) {
+      let colorBadge = document.querySelector('.filter-badge[data-filter-type="color"]');
+      if (colorBadge) {
+        colorBadge.textContent = 'Color: ' + p.color;
+        colorBadge.setAttribute('data-filter-value', p.color);
+        colorBadge.style.display = '';
+      }
+    } else {
+      let colorBadge = document.querySelector('.filter-badge[data-filter-type="color"]');
+      if (colorBadge) colorBadge.style.display = 'none';
+    }
+    document.getElementById('cart-form').action = '/shop/cart/add/' + p.id + '/';
+    document.getElementById('wishlist-form').action = '/shop/wishlist/add/' + p.id + '/';
+    document.querySelector('#cart-form input[name="quantity"]').value = 1;
+    window.history.replaceState({}, '', '/shop/' + p.slug + '/');
+  }
+  function fetchAndShowVariations(type, value) {
+    fetch(window.location.pathname + `?filter_type=${type}&filter_value=${encodeURIComponent(value)}`,
+      {headers: {'x-requested-with': 'XMLHttpRequest'}})
+      .then(r => r.json())
+      .then(function(data) {
+        if (data.success && data.variations) {
+          if (type === 'size') {
+            const sizes = [...new Set(data.variations.map(v => v.size).filter(Boolean))];
+            document.getElementById('size-variations').innerHTML = renderVariationList('size', sizes, value, data.variations);
+          } else if (type === 'color') {
+            const colors = [...new Set(data.variations.map(v => v.color).filter(Boolean))];
+            document.getElementById('color-variations').innerHTML = renderVariationList('color', colors, value, data.variations);
+          }
+        }
+      });
+  }
+  document.querySelectorAll('.filter-badge').forEach(function(badge) {
+    badge.addEventListener('click', function() {
+      const type = this.getAttribute('data-filter-type');
+      const value = this.getAttribute('data-filter-value');
+      fetchAndShowVariations(type, value);
+    });
+    badge.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') this.click();
+    });
+  });
+  // Product image thumbnail click logic
+  document.querySelectorAll('.product-thumb').forEach(function(thumb) {
+    thumb.addEventListener('click', function() {
+      var mainImg = document.getElementById('main-product-image');
+      if (mainImg) {
+        mainImg.src = this.src;
+        mainImg.alt = this.alt;
+      }
+    });
+  });
+});
+</script>
+<style>
+.product-suggestion-card .suggestion-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  display: block;
+}
+.product-suggestion-card .card-img-top {
+  transition: transform 0.2s;
+}
+.product-suggestion-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+.product-suggestion-card .ratio {
+  background: #f8f9fa;
+}
+</style>
+{% endblock %}

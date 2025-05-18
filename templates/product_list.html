@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Shop - MyShop{% endblock %}
+{% block content %}
+<h1 class="mb-4 fw-bold text-center">Shop</h1>
+<div class="row mb-4">
+    <aside class="col-md-3">
+        <div class="sticky-top" style="top: 90px;">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white fw-semibold">Categories</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item {% if not selected_category %}active{% endif %}">
+                        <a href="?" class="text-decoration-none {% if not selected_category %}text-white{% endif %}">All</a>
+                    </li>
+                    {% for category in categories %}
+                    <li class="list-group-item {% if selected_category == category.slug %}active{% endif %}">
+                        <a href="?category={{ category.slug }}" class="text-decoration-none {% if selected_category == category.slug %}text-white{% endif %}">{{ category.name }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-secondary text-white fw-semibold">Price Range</div>
+                <form method="get" class="p-3">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Min</span>
+                        <input type="number" name="min_price" class="form-control" placeholder="0" value="{{ request.GET.min_price }}">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Max</span>
+                        <input type="number" name="max_price" class="form-control" placeholder="1000" value="{{ request.GET.max_price }}">
+                    </div>
+                    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                </form>
+            </div>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-info text-white fw-semibold">Search</div>
+                <form method="get" class="p-3">
+                    <input type="text" name="q" class="form-control mb-2" placeholder="Search products..." value="{{ request.GET.q }}">
+                    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                    <button type="submit" class="btn btn-outline-info w-100">Search</button>
+                </form>
+            </div>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-warning text-dark fw-semibold">Filter by Size</div>
+                <form method="get" class="p-3">
+                    <select name="size" class="form-select mb-2" onchange="this.form.submit()">
+                        <option value="">All Sizes</option>
+                        {% for s in unique_sizes %}
+                            <option value="{{ s }}" {% if request.GET.size == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                    {% if request.GET.min_price %}<input type="hidden" name="min_price" value="{{ request.GET.min_price }}">{% endif %}
+                    {% if request.GET.max_price %}<input type="hidden" name="max_price" value="{{ request.GET.max_price }}">{% endif %}
+                    {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+                </form>
+            </div>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-danger text-white fw-semibold">Filter by Color</div>
+                <form method="get" class="p-3">
+                    <select name="color" class="form-select mb-2" onchange="this.form.submit()">
+                        <option value="">All Colors</option>
+                        {% for c in unique_colors %}
+                            <option value="{{ c }}" {% if request.GET.color == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                    {% if request.GET.min_price %}<input type="hidden" name="min_price" value="{{ request.GET.min_price }}">{% endif %}
+                    {% if request.GET.max_price %}<input type="hidden" name="max_price" value="{{ request.GET.max_price }}">{% endif %}
+                    {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+                </form>
+            </div>
+        </div>
+    </aside>
+    <main class="col-md-9">
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 position-relative">
+                    <a href="{% url 'product_detail' product.slug %}" class="stretched-link" tabindex="-1" aria-label="View details for {{ product.name }}"></a>
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top p-2 rounded-4" alt="{{ product.name }}" style="object-fit:cover; height:220px;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">{{ product.name }}</h5>
+                        <p class="card-text small text-muted mb-2">{{ product.description|truncatewords:18 }}</p>
+                        <div class="mb-2">
+                            <span class="badge bg-success fs-6">{{ currency_symbol }}{{ product.display_price }}</span>
+                        </div>
+                        <form action="{% url 'cart_add' product.id %}" method="post" class="d-flex align-items-center gap-2 mt-auto position-relative" style="z-index:2;">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="1" min="1" class="form-control form-control-sm w-25" style="min-width:60px;">
+                            <button type="submit" class="btn btn-primary btn-sm flex-fill">Add to Cart</button>
+                        </form>
+                        <form action="{% url 'wishlist_add' product.id %}" method="post" class="mt-2 position-relative" style="z-index:2;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-heart"></i> Add to Wishlist</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12"><p class="text-center text-muted">No products available.</p></div>
+            {% endfor %}
+        </div>
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if request.GET.min_price %}min_price={{ request.GET.min_price }}&{% endif %}{% if request.GET.max_price %}max_price={{ request.GET.max_price }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if request.GET.min_price %}min_price={{ request.GET.min_price }}&{% endif %}{% if request.GET.max_price %}max_price={{ request.GET.max_price }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if request.GET.min_price %}min_price={{ request.GET.min_price }}&{% endif %}{% if request.GET.max_price %}max_price={{ request.GET.max_price }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </main>
+</div>
+{% endblock %}
