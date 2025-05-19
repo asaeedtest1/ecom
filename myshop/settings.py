@@ -30,11 +30,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-fallback-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    'web-production-ddbf.up.railway.app',
-    '127.0.0.1',
-    'localhost',
-]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,web-production-9fa80.up.railway.app').split(',')
 
 
 # Application definition
