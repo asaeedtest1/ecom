@@ -19,8 +19,8 @@ COPY . /app/
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Expose port 8000
-EXPOSE 8000
+# Expose port 8080
+EXPOSE 8080
 
 # Run the application
-CMD ["sh", "-c", "python manage.py migrate && gunicorn myshop.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn myshop.wsgi:application --bind 0.0.0.0:8080"]
