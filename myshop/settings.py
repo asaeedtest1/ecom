@@ -168,8 +168,23 @@ CURRENCIES = [
 ]
 DEFAULT_CURRENCY = "USD"
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://web-production-9fa80.up.railway.app",
-    "http://127.0.0.1:8000",
-    "http://localhost:8000"
+# PythonAnywhere Host Configuration
+ALLOWED_HOSTS = [
+    'your_pythonanywhere_username.pythonanywhere.com',
+    'localhost',
+    '127.0.0.1'
 ]
+
+# Static and Media Files Configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/your_pythonanywhere_username/ecom/static'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/home/your_pythonanywhere_username/ecom/media'
+
+# Security Settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://your_pythonanywhere_username.pythonanywhere.com'
+]
+
+# Set DEBUG to False in production
+DEBUG = False
