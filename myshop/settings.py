@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-fallback-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # Default to True for development
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,web-production-9fa80.up.railway.app').split(',')
 
@@ -134,10 +134,22 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+STATICFILES_DIRS = []
+
+# PythonAnywhere specific settings
+if not DEBUG and 'PYTHONANYWHERE_SITE' in os.environ:
+    # Replace 'your_username' with your PythonAnywhere username
+    MEDIA_ROOT = '/home/your_username/myshop/media'
+    STATIC_ROOT = '/home/your_username/myshop/static'
+    MEDIA_URL = '/media/'
+    STATIC_URL = '/static/'
+
+# For development, serve static files from the static directory as well
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
